@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>🎬 CINEMA PREMIUM • 18+ STREAMING</title>
+    <title>🎬 CINEMA PREMIUM • 18+ VERIFICATION</title>
     
     <!-- Telegram WebApp & Adsgram Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -16,14 +16,58 @@
         body { background: #0a0a0f; font-family: 'Inter', system-ui, sans-serif; color: #f0f0f0; min-height: 100vh; }
         .app-container { max-width: 560px; margin: 0 auto; background: radial-gradient(circle at 10% 20%, #12101e, #03020a); min-height: 100vh; position: relative; box-shadow: 0 0 60px rgba(0,0,0,0.6); }
 
-        /* Loading Overlay - only shown for ads */
+        /* Age Verification Overlay */
+        .age-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 40%, #0c081f, #000000);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(24px);
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .age-overlay.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: scale(0.96);
+        }
+        .age-card {
+            background: rgba(20, 18, 38, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 64px;
+            padding: 48px 32px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid rgba(255, 100, 150, 0.8);
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6), 0 0 0 2px rgba(255, 80, 120, 0.2) inset, 0 0 60px rgba(255, 51, 102, 0.3);
+        }
+        .warning-icon { font-size: 88px; filter: drop-shadow(0 0 18px #ff2e6e); margin-bottom: 12px; animation: pulse 1.8s infinite ease; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.07); } 100% { transform: scale(1); } }
+        .age-card h2 { font-size: 32px; font-weight: 900; background: linear-gradient(135deg, #FF95B3, #FFBC6E, #FFE6A3); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; }
+        .age-caption { color: #f0cfdc; margin: 16px 0 12px; font-size: 15px; font-weight: 700; background: rgba(255,70,110,0.2); padding: 6px 20px; border-radius: 60px; display: inline-block; }
+        .age-warning-text { color: #ffb7aa; font-size: 14px; font-weight: 500; margin: 16px 0 20px; background: rgba(30, 20, 40, 0.7); padding: 14px 16px; border-radius: 48px; line-height: 1.45; border: 1px solid rgba(255,100,130,0.3); }
+        .verify-age-btn { background: linear-gradient(105deg, #ff2b6d, #ff8f4d); border: none; padding: 18px 24px; border-radius: 100px; font-weight: 800; font-size: 20px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; box-shadow: 0 12px 28px rgba(255, 51, 102, 0.5); transition: 0.2s; margin-top: 8px; }
+        .verify-age-btn:active { transform: scale(0.97); }
+        .enter-site-btn { background: linear-gradient(105deg, #00b894, #00cec9); border: none; padding: 18px 24px; border-radius: 100px; font-weight: 800; font-size: 20px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; box-shadow: 0 12px 28px rgba(0, 184, 148, 0.4); transition: 0.2s; margin-top: 16px; }
+        .enter-site-btn:active { transform: scale(0.97); }
+        .hidden { display: none; }
+        .footer-note { font-size: 11px; margin-top: 24px; opacity: 0.6; }
+
+        /* Loading Overlay */
         .loading-overlay { position: fixed; inset: 0; background: #03010cee; backdrop-filter: blur(25px); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .loading-overlay.show { display: flex; }
         .film-spinner { width: 80px; height: 80px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ff5982" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 4v16"/><path d="M16 4v16"/><path d="M2 8h4"/><path d="M2 12h4"/><path d="M2 16h4"/><path d="M18 8h4"/><path d="M18 12h4"/><path d="M18 16h4"/></svg>') no-repeat center; background-size: contain; animation: spinReel 1s infinite; }
         @keyframes spinReel { to { transform: rotate(360deg); } }
         .loading-text { color: #ff91b5; margin-top: 20px; font-weight: 700; background: rgba(0,0,0,0.6); padding: 8px 24px; border-radius: 60px; }
 
-        /* Main UI - directly visible, no age gate */
+        /* Main UI (hidden until verification completes) */
+        .content-hidden { display: none; }
+        
         .stream-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px 14px; background: rgba(8, 6, 18, 0.55); backdrop-filter: blur(18px); border-bottom: 1px solid rgba(255, 90, 130, 0.6); position: sticky; top: 0; z-index: 99; }
         .logo-premium { font-weight: 900; font-size: 22px; background: linear-gradient(135deg, #FFE3B0, #FF9770, #FF5E8E); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .badge-4k { background: rgba(0,0,0,0.7); border-radius: 40px; padding: 6px 20px; font-size: 12px; font-weight: 800; border: 1px solid #ff809f; }
@@ -67,12 +111,9 @@
         .special-offer { flex: 1; background: #120e2b; border-radius: 48px; padding: 20px 12px; text-align: center; border: 1px solid #ff89ab; cursor: pointer; }
         .footer-cinema { text-align: center; padding: 30px 20px; background: #05030f; border-top: 2px solid #ff4770; font-size: 11px; }
         
-        /* Floating Back Button */
-        .back-home-btn { position: fixed; bottom: 20px; right: 20px; background: linear-gradient(135deg, #1e1a3a, #28204f); border-radius: 60px; padding: 12px 20px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; z-index: 1000; cursor: pointer; border: 1px solid #ff7b9e; box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(8px); transition: 0.2s; }
+        .back-home-btn { position: fixed; bottom: 20px; right: 20px; background: linear-gradient(135deg, #1e1a3a, #28204f); border-radius: 60px; padding: 12px 20px; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; z-index: 1000; cursor: pointer; border: 1px solid #ff7b9e; box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(8px); }
         .back-home-btn:active { transform: scale(0.95); }
-        .back-home-btn span { font-size: 20px; }
         
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #1a162e; }
         ::-webkit-scrollbar-thumb { background: #ff6085; border-radius: 10px; }
@@ -80,14 +121,48 @@
 </head>
 <body>
 <div class="app-container">
-    <!-- Loading Overlay (only for ad breaks) -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="film-spinner"></div>
-        <div class="loading-text">✨ LOADING SECURE STREAM • AD</div>
+    <!-- AGE VERIFICATION OVERLAY (Step 1) -->
+    <div class="age-overlay" id="ageOverlay">
+        <div class="age-card">
+            <div class="warning-icon">🔞</div>
+            <h2>AGE VERIFICATION</h2>
+            <div class="age-caption">⚠️ MATURE CONTENT ⚠️</div>
+            <p class="age-warning-text">
+                📢 আমাদের সাইট থেকে ভিডিও দেখার জন্য আপনার বয়স অবশ্যই ১৮ বছরের বেশি হতে হবে।<br>
+                <strong>You must be at least 18 years old to access this content.</strong>
+            </p>
+            <button class="verify-age-btn" id="verifyAgeFirstBtn">
+                <span>✅</span> প্রাপ্তবয়স্ক যাচাই করুন (Verify Age)
+            </button>
+            <div class="footer-note">🔞 Age verification required by law • Adult content</div>
+        </div>
     </div>
 
-    <!-- Main Content - Direct Access, No Verification Button -->
-    <div id="mainContent">
+    <!-- SECONDARY OVERLAY (after ad, before site entry) -->
+    <div class="age-overlay hidden" id="secondOverlay">
+        <div class="age-card">
+            <div class="warning-icon">🎬</div>
+            <h2>সাইটে প্রবেশ করুন</h2>
+            <div class="age-caption">✅ আপনার বয়স যাচাই সম্পূর্ণ</div>
+            <p class="age-warning-text">
+                ✨ ধন্যবাদ! আপনার বয়স সফলভাবে যাচাই করা হয়েছে।<br>
+                নিচের বাটনে ক্লিক করুন এবং সম্পূর্ণ সাইটে প্রবেশ করুন।
+            </p>
+            <button class="enter-site-btn" id="enterSiteBtn">
+                <span>🚀</span> সাইটে প্রবেশ করুন (Enter Site)
+            </button>
+            <div class="footer-note">🔞 Unlimited access • 4K Streaming</div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="film-spinner"></div>
+        <div class="loading-text">✨ Adsgram বিজ্ঞাপন লোড হচ্ছে... দয়া করে অপেক্ষা করুন</div>
+    </div>
+
+    <!-- Main Content (hidden until final entry) -->
+    <div class="content-hidden" id="mainContent">
         <div class="stream-header">
             <div class="logo-premium">🎬 CINEMA<span style="color:#ff708f;"> PREMIUM</span></div>
             <div class="badge-4k">4K ULTRA HD</div>
@@ -106,19 +181,19 @@
                     <span>💬 <span id="heroComments">২৭৫</span>K</span>
                 </div>
             </div>
-            <button class="watch-now-btn" data-link="https://t.me/khelahobe07_bot?startapp"><span>🎬</span> এখনই দেখুন (Watch Now)</button>
+            <button class="watch-now-btn" data-link="https://omg10.com/4/9717825"><span>🎬</span> এখনই দেখুন (Watch Now)</button>
         </div>
 
         <div class="cat-scroll">
-            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">🎬 ACTION</div>
-            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">🔥 BOLLYWOOD</div>
-            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">💋 ROMANCE 18+</div>
-            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">🎥 EXCLUSIVE</div>
-            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">🌙 WEBCAM</div>
-            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">📀 4K COLLECTION</div>
+            <div class="cat-item" data-link="https://omg10.com/4/9717825">🎬 ACTION</div>
+            <div class="cat-item" data-link="https://omg10.com/4/9429975">🔥 BOLLYWOOD</div>
+            <div class="cat-item" data-link="https://omg10.com/4/9717825">💋 ROMANCE 18+</div>
+            <div class="cat-item" data-link="https://omg10.com/4/9429975">🎥 EXCLUSIVE</div>
+            <div class="cat-item" data-link="https://omg10.com/4/9717825">🌙 WEBCAM</div>
+            <div class="cat-item" data-link="https://omg10.com/4/9429975">📀 4K COLLECTION</div>
         </div>
 
-        <div class="section-row"><h3>⚡ TRENDING NOW</h3><span class="see-all" id="viewAllTrending" data-link="https://t.me/khelahobe07_bot?startapp">ALL MOVIES ›</span></div>
+        <div class="section-row"><h3>⚡ TRENDING NOW</h3><span class="see-all" id="viewAllTrending" data-link="https://omg10.com/4/9717825">ALL MOVIES ›</span></div>
         <div class="movie-grid" id="trendingGrid">
             <div class="movie-card" data-link="https://omg10.com/4/9717825">
                 <div class="card-media"><img src="https://i.imgur.com/5vzBNBz.jpeg"><span class="card-badge">HDR</span></div>
@@ -178,7 +253,7 @@
             <button class="watch-now-btn" data-link="https://omg10.com/4/9717825"><span>⭐</span> এখনই দেখুন</button>
         </div>
 
-        <div class="section-row"><h3>🔴 LIVE NOW</h3><span class="see-all" id="viewAllLive" data-link="https://t.me/khelahobe07_bot?startapp">ALL STREAMS ›</span></div>
+        <div class="section-row"><h3>🔴 LIVE NOW</h3><span class="see-all" id="viewAllLive" data-link="https://omg10.com/4/9717825">ALL STREAMS ›</span></div>
         <div class="live-row">
             <div class="live-card" data-link="https://omg10.com/4/9429975">
                 <img class="live-preview" src="https://i.imgur.com/jUvXU8r.jpeg">
@@ -212,51 +287,113 @@
         <div class="footer-cinema">🎬 18+ CINEMA PREMIUM • 4K STREAMING<br><span style="color:#ff9cbb;">UNLIMITED ACCESS | ULTRA HD</span></div>
     </div>
 
-    <!-- Floating Back to Home Button -->
-    <div class="back-home-btn" id="backHomeBtn"><span>🏠</span> Back to Home</div>
+    <div class="back-home-btn" id="backHomeBtn" style="display: none;"><span>🏠</span> Back to Home</div>
 </div>
 
 <script>
     const ADSGRAM_BLOCK_ID = "int-28198";
+    const ageOverlay = document.getElementById('ageOverlay');
+    const secondOverlay = document.getElementById('secondOverlay');
     const loadingOverlay = document.getElementById('loadingOverlay');
+    const mainContent = document.getElementById('mainContent');
+    const verifyFirstBtn = document.getElementById('verifyAgeFirstBtn');
+    const enterSiteBtn = document.getElementById('enterSiteBtn');
     const backHomeBtn = document.getElementById('backHomeBtn');
-    let isUnlocked = true; // Direct access - no verification needed
+    let isUnlocked = false;
+    
+    // Fixed entry link as requested
+    const ENTRY_LINK = "https://omg10.com/4/9717825";
 
     function showAdsgramAd() {
         return new Promise((resolve) => {
             if (typeof Adsgram === 'undefined' || !Adsgram.init) {
+                console.warn("Adsgram not loaded, bypassing ad");
                 setTimeout(() => resolve(true), 800);
                 return;
             }
             try {
                 const AdController = Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
-                AdController.show().then(() => resolve(true)).catch(() => resolve(true));
-            } catch(e) { resolve(true); }
+                AdController.show().then(() => resolve(true)).catch((err) => { console.error(err); resolve(true); });
+            } catch(e) { console.error(e); resolve(true); }
         });
     }
 
-    // Smart redirect with back support (push state so back button returns to home)
-    async function redirectWithBackSupport(link) {
+    // Step 1: First button click -> show ad, then show second overlay
+    async function handleFirstVerification() {
+        if (isUnlocked) return;
         loadingOverlay.classList.add('show');
         await showAdsgramAd();
         loadingOverlay.classList.remove('show');
-        // Push a state so that pressing back returns to this app (home page)
+        
+        // Hide first overlay, show second overlay (Enter site button)
+        ageOverlay.classList.add('hide');
+        secondOverlay.classList.remove('hidden');
+    }
+    
+    // Step 2: Enter site button -> redirect to ENTRY_LINK, but push state so back returns to home
+    function handleEnterSite() {
+        if (isUnlocked) return;
+        isUnlocked = true;
+        
+        // Push a state so that when user presses back from the external link, they return to main content
+        if (window.history && window.history.pushState) {
+            window.history.pushState({ fromApp: true, homeVisible: true, returnToHome: true }, document.title, window.location.href);
+        }
+        
+        // Hide both overlays and show main content temporarily before redirect? No, we will redirect directly.
+        // But we need to ensure that when user comes back, main content is visible.
+        // We'll set a flag in sessionStorage to remember that verification is done.
+        sessionStorage.setItem('age_verified', 'true');
+        
+        // Now redirect to the entry link
+        window.location.href = ENTRY_LINK;
+    }
+    
+    // Check if user is returning from external link (on page load)
+    function checkReturnFromExternal() {
+        // If sessionStorage has verified flag and we are back on this page
+        if (sessionStorage.getItem('age_verified') === 'true') {
+            sessionStorage.removeItem('age_verified');
+            isUnlocked = true;
+            // Hide all overlays
+            ageOverlay.classList.add('hide');
+            if (secondOverlay) secondOverlay.classList.add('hide');
+            // Show main content
+            mainContent.classList.remove('content-hidden');
+            if(backHomeBtn) backHomeBtn.style.display = 'flex';
+            
+            // Initialize all features
+            generateRealisticStats();
+            startAutoStatsUpdate();
+            attachAllClickHandlers();
+            
+            // Push state for back button navigation within app
+            if (window.history && window.history.pushState) {
+                window.history.pushState({ fromApp: true, homeVisible: true }, document.title, window.location.href);
+            }
+            window.addEventListener('popstate', handlePopState);
+        }
+    }
+    
+    // Redirect logic for content clicks (with ad before redirect)
+    async function redirectWithBackSupport(link) {
+        if (!isUnlocked) return;
+        loadingOverlay.classList.add('show');
+        await showAdsgramAd();
+        loadingOverlay.classList.remove('show');
         if (window.history && window.history.pushState) {
             window.history.pushState({ fromApp: true, homeVisible: true }, document.title, window.location.href);
         }
         window.location.href = link;
     }
-
-    // Setup all click handlers
+    
     function attachAllClickHandlers() {
-        // Watch now buttons
         const watchBtns = document.querySelectorAll('.watch-now-btn');
         watchBtns.forEach(btn => {
             btn.removeEventListener('click', watchHandler);
             btn.addEventListener('click', watchHandler);
         });
         
-        // Clickable elements: categories, hot cinema, see-all, special offers, live cards, movie cards, vip pass
         const clickableSelectors = ['.cat-item', '.hot-cinema', '.see-all', '.special-offer', '.live-card', '.movie-card'];
         clickableSelectors.forEach(selector => {
             document.querySelectorAll(selector).forEach(el => {
@@ -271,13 +408,12 @@
             vipDiv.addEventListener('click', clickableHandler);
         }
         
-        // Featured hero container
         const heroDiv = document.querySelector('.featured-movie');
         if(heroDiv && !heroDiv.hasAttribute('data-listener')) {
             heroDiv.setAttribute('data-listener', 'true');
             heroDiv.addEventListener('click', (e) => {
                 if(e.target.classList && e.target.classList.contains('watch-now-btn')) return;
-                redirectWithBackSupport("https://t.me/khelahobe07_bot?startapp");
+                redirectWithBackSupport(ENTRY_LINK);
             });
         }
     }
@@ -293,31 +429,27 @@
         e.stopPropagation();
         if(e.target.classList && e.target.classList.contains('watch-now-btn')) return;
         let link = e.currentTarget.getAttribute('data-link');
-        if(!link && e.currentTarget.id === 'viewAllTrending') link = "https://t.me/khelahobe07_bot?startapp";
-        if(!link && e.currentTarget.id === 'viewAllLive') link = "https://t.me/khelahobe07_bot?startapp";
-        if(!link) link = "https://t.me/khelahobe07_bot?startapp";
+        if(!link && e.currentTarget.id === 'viewAllTrending') link = ENTRY_LINK;
+        if(!link && e.currentTarget.id === 'viewAllLive') link = ENTRY_LINK;
+        if(!link) link = ENTRY_LINK;
         await redirectWithBackSupport(link);
     }
     
-    // Handle popstate (back button pressed after returning from external link)
     function handlePopState(event) {
-        // Ensure main content is visible (it already is, but just to be safe)
-        const mainDiv = document.getElementById('mainContent');
-        if (mainDiv) mainDiv.style.display = 'block';
-        // Refresh stats for fresh look
+        if (!isUnlocked) return;
+        if (mainContent) mainContent.classList.remove('content-hidden');
+        if (secondOverlay) secondOverlay.classList.add('hide');
+        if (ageOverlay) ageOverlay.classList.add('hide');
         generateRealisticStats();
-        // Show back button again
         if (backHomeBtn) backHomeBtn.style.display = 'flex';
     }
     
     function manualBackToHome() {
-        // If user clicks floating button, ensure home is visible and push clean state
-        const mainDiv = document.getElementById('mainContent');
-        if (mainDiv) mainDiv.style.display = 'block';
+        if (!isUnlocked) return;
+        mainContent.classList.remove('content-hidden');
         window.history.pushState({ fromApp: true, homeVisible: true }, document.title, window.location.href);
     }
     
-    // Random stats for engagement
     function generateRealisticStats() {
         try {
             if(document.getElementById('heroViews')) document.getElementById('heroViews').innerHTML = (Math.random() * 2.5 + 3.8).toFixed(1);
@@ -343,24 +475,15 @@
         } catch(e){}
     }
     
-    function startAutoStatsUpdate() { 
-        setInterval(generateRealisticStats, 8000); 
-    }
+    function startAutoStatsUpdate() { setInterval(generateRealisticStats, 8000); }
     
-    // Initialize everything on page load
-    window.addEventListener('DOMContentLoaded', () => {
-        attachAllClickHandlers();
-        generateRealisticStats();
-        startAutoStatsUpdate();
-        
-        // Push initial state so back button works nicely
-        if (window.history && window.history.pushState) {
-            window.history.pushState({ fromApp: true, homeVisible: true }, document.title, window.location.href);
-        }
-        window.addEventListener('popstate', handlePopState);
-    });
-    
+    verifyFirstBtn.addEventListener('click', handleFirstVerification);
+    enterSiteBtn.addEventListener('click', handleEnterSite);
     if (backHomeBtn) backHomeBtn.addEventListener('click', manualBackToHome);
+    
+    // Check if user is returning from external link
+    checkReturnFromExternal();
+    
     if (window.Telegram && window.Telegram.WebApp) { 
         window.Telegram.WebApp.ready(); 
         window.Telegram.WebApp.expand(); 
