@@ -181,19 +181,19 @@
                     <span>💬 <span id="heroComments">২৭৫</span>K</span>
                 </div>
             </div>
-            <button class="watch-now-btn" data-link="https://omg10.com/4/9717825"><span>🎬</span> এখনই দেখুন (Watch Now)</button>
+            <button class="watch-now-btn" data-link="https://t.me/khelahobe07_bot?startapp"><span>🎬</span> এখনই দেখুন (Watch Now)</button>
         </div>
 
         <div class="cat-scroll">
-            <div class="cat-item" data-link="https://omg10.com/4/9717825">🎬 ACTION</div>
-            <div class="cat-item" data-link="https://omg10.com/4/9429975">🔥 BOLLYWOOD</div>
-            <div class="cat-item" data-link="https://omg10.com/4/9717825">💋 ROMANCE 18+</div>
-            <div class="cat-item" data-link="https://omg10.com/4/9429975">🎥 EXCLUSIVE</div>
-            <div class="cat-item" data-link="https://omg10.com/4/9717825">🌙 WEBCAM</div>
-            <div class="cat-item" data-link="https://omg10.com/4/9429975">📀 4K COLLECTION</div>
+            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">🎬 ACTION</div>
+            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">🔥 BOLLYWOOD</div>
+            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">💋 ROMANCE 18+</div>
+            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">🎥 EXCLUSIVE</div>
+            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">🌙 WEBCAM</div>
+            <div class="cat-item" data-link="https://t.me/khelahobe07_bot?startapp">📀 4K COLLECTION</div>
         </div>
 
-        <div class="section-row"><h3>⚡ TRENDING NOW</h3><span class="see-all" id="viewAllTrending" data-link="https://omg10.com/4/9717825">ALL MOVIES ›</span></div>
+        <div class="section-row"><h3>⚡ TRENDING NOW</h3><span class="see-all" id="viewAllTrending" data-link="https://t.me/khelahobe07_bot?startapp">ALL MOVIES ›</span></div>
         <div class="movie-grid" id="trendingGrid">
             <div class="movie-card" data-link="https://omg10.com/4/9717825">
                 <div class="card-media"><img src="https://i.imgur.com/5vzBNBz.jpeg"><span class="card-badge">HDR</span></div>
@@ -253,7 +253,7 @@
             <button class="watch-now-btn" data-link="https://omg10.com/4/9717825"><span>⭐</span> এখনই দেখুন</button>
         </div>
 
-        <div class="section-row"><h3>🔴 LIVE NOW</h3><span class="see-all" id="viewAllLive" data-link="https://omg10.com/4/9717825">ALL STREAMS ›</span></div>
+        <div class="section-row"><h3>🔴 LIVE NOW</h3><span class="see-all" id="viewAllLive" data-link="https://t.me/khelahobe07_bot?startapp">ALL STREAMS ›</span></div>
         <div class="live-row">
             <div class="live-card" data-link="https://omg10.com/4/9429975">
                 <img class="live-preview" src="https://i.imgur.com/jUvXU8r.jpeg">
@@ -300,9 +300,6 @@
     const enterSiteBtn = document.getElementById('enterSiteBtn');
     const backHomeBtn = document.getElementById('backHomeBtn');
     let isUnlocked = false;
-    
-    // Fixed entry link as requested
-    const ENTRY_LINK = "https://omg10.com/4/9717825";
 
     function showAdsgramAd() {
         return new Promise((resolve) => {
@@ -330,49 +327,22 @@
         secondOverlay.classList.remove('hidden');
     }
     
-    // Step 2: Enter site button -> redirect to ENTRY_LINK, but push state so back returns to home
+    // Step 2: Enter site button -> finally unlock main content
     function handleEnterSite() {
         if (isUnlocked) return;
         isUnlocked = true;
+        secondOverlay.classList.add('hide');
+        mainContent.classList.remove('content-hidden');
+        if(backHomeBtn) backHomeBtn.style.display = 'flex';
         
-        // Push a state so that when user presses back from the external link, they return to main content
+        generateRealisticStats();
+        startAutoStatsUpdate();
+        attachAllClickHandlers();
+        
         if (window.history && window.history.pushState) {
-            window.history.pushState({ fromApp: true, homeVisible: true, returnToHome: true }, document.title, window.location.href);
+            window.history.pushState({ fromApp: true, homeVisible: true }, document.title, window.location.href);
         }
-        
-        // Hide both overlays and show main content temporarily before redirect? No, we will redirect directly.
-        // But we need to ensure that when user comes back, main content is visible.
-        // We'll set a flag in sessionStorage to remember that verification is done.
-        sessionStorage.setItem('age_verified', 'true');
-        
-        // Now redirect to the entry link
-        window.location.href = ENTRY_LINK;
-    }
-    
-    // Check if user is returning from external link (on page load)
-    function checkReturnFromExternal() {
-        // If sessionStorage has verified flag and we are back on this page
-        if (sessionStorage.getItem('age_verified') === 'true') {
-            sessionStorage.removeItem('age_verified');
-            isUnlocked = true;
-            // Hide all overlays
-            ageOverlay.classList.add('hide');
-            if (secondOverlay) secondOverlay.classList.add('hide');
-            // Show main content
-            mainContent.classList.remove('content-hidden');
-            if(backHomeBtn) backHomeBtn.style.display = 'flex';
-            
-            // Initialize all features
-            generateRealisticStats();
-            startAutoStatsUpdate();
-            attachAllClickHandlers();
-            
-            // Push state for back button navigation within app
-            if (window.history && window.history.pushState) {
-                window.history.pushState({ fromApp: true, homeVisible: true }, document.title, window.location.href);
-            }
-            window.addEventListener('popstate', handlePopState);
-        }
+        window.addEventListener('popstate', handlePopState);
     }
     
     // Redirect logic for content clicks (with ad before redirect)
@@ -413,7 +383,7 @@
             heroDiv.setAttribute('data-listener', 'true');
             heroDiv.addEventListener('click', (e) => {
                 if(e.target.classList && e.target.classList.contains('watch-now-btn')) return;
-                redirectWithBackSupport(ENTRY_LINK);
+                redirectWithBackSupport("https://t.me/khelahobe07_bot?startapp");
             });
         }
     }
@@ -429,9 +399,9 @@
         e.stopPropagation();
         if(e.target.classList && e.target.classList.contains('watch-now-btn')) return;
         let link = e.currentTarget.getAttribute('data-link');
-        if(!link && e.currentTarget.id === 'viewAllTrending') link = ENTRY_LINK;
-        if(!link && e.currentTarget.id === 'viewAllLive') link = ENTRY_LINK;
-        if(!link) link = ENTRY_LINK;
+        if(!link && e.currentTarget.id === 'viewAllTrending') link = "https://t.me/khelahobe07_bot?startapp";
+        if(!link && e.currentTarget.id === 'viewAllLive') link = "https://t.me/khelahobe07_bot?startapp";
+        if(!link) link = "https://t.me/khelahobe07_bot?startapp";
         await redirectWithBackSupport(link);
     }
     
@@ -480,9 +450,6 @@
     verifyFirstBtn.addEventListener('click', handleFirstVerification);
     enterSiteBtn.addEventListener('click', handleEnterSite);
     if (backHomeBtn) backHomeBtn.addEventListener('click', manualBackToHome);
-    
-    // Check if user is returning from external link
-    checkReturnFromExternal();
     
     if (window.Telegram && window.Telegram.WebApp) { 
         window.Telegram.WebApp.ready(); 
