@@ -1,11 +1,11 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
 
     <script>
-window.onload = function() {
-    window.Adsgram.init({ blockId: "int-28198" }).show();
-}
+        window.onload = function() {
+            window.Adsgram.init({ blockId: "int-28198" }).show();
+        }
     </script>
 
     <meta charset="UTF-8">
@@ -226,16 +226,16 @@ window.onload = function() {
 </div>
 
 <script>
-    // --- কনফিগারেশন (আপনার দেওয়া আসল স্ক্রিপ্ট অনুযায়ী) ---
+    // --- কনফিগারেশন ---
     const ADSGRAM_BLOCK_ID = "int-28198";
     const REDIRECT_LINKS = [
         "https://omg10.com/4/9446627",
         "https://omg10.com/4/9429975",
         "https://omg10.com/4/9717825"
     ];
-    const REDIRECT_DELAY = 6000; // 6 সেকেন্ড (আপনার দেওয়া setTimeout এর মতো)
+    const REDIRECT_DELAY = 6000;
 
-    // --- ইমেজ লিস্ট (আপনার দেওয়া) ---
+    // --- ইমেজ লিস্ট ---
     const imageUrls = [
         "https://i.ibb.co.com/bRrgh9mD/IMG-20260822-221556-525.jpg",
         "https://i.ibb.co.com/3yJ9FYGL/IMG-20260822-221555-428.jpg",
@@ -270,9 +270,10 @@ window.onload = function() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     const videoGrid = document.getElementById('videoGrid');
     let linkIndex = 0;
-    let isAdShowing = false; // একসাথে একাধিক ক্লিক প্রতিরোধ
+    let isProcessing = false;
+    let adShown = false; // ট্র্যাক করবে এড আগে শো হয়েছে কিনা
 
-    // --- Adsgram ফাংশন (আপনার দেওয়া পদ্ধতি) ---
+    // --- Adsgram ফাংশন ---
     function showAdsgramAd() {
         return new Promise((resolve) => {
             if (typeof Adsgram === 'undefined' || !Adsgram.init) {
@@ -281,16 +282,18 @@ window.onload = function() {
                 return;
             }
             try {
-                // আপনার দেওয়া method: window.Adsgram.init({ blockId }).show()
                 const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
                 AdController.show().then(() => {
+                    adShown = true;
                     resolve(true);
                 }).catch((err) => {
                     console.error("Adsgram error:", err);
+                    adShown = true;
                     resolve(true);
                 });
             } catch (e) {
                 console.error("Adsgram init error:", e);
+                adShown = true;
                 resolve(true);
             }
         });
@@ -298,20 +301,22 @@ window.onload = function() {
 
     // --- হ্যান্ডেল ভিডিও ক্লিক ---
     async function handleVideoClick() {
-        if (isAdShowing) return; // ইতিমধ্যে এড চলছে
-        isAdShowing = true;
-        loadingOverlay.classList.add('show');
+        if (isProcessing) return;
+        isProcessing = true;
 
-        // 1. Adsgram এড দেখান
-        await showAdsgramAd();
+        // যদি এড আগে শো না হয়ে থাকে, তাহলে এড দেখান
+        if (!adShown) {
+            loadingOverlay.classList.add('show');
+            await showAdsgramAd();
+            loadingOverlay.classList.remove('show');
+            
+            // এড দেখানোর পর ডিলে
+            await new Promise(resolve => setTimeout(resolve, REDIRECT_DELAY));
+        }
 
-        // 2. রিডাইরেক্ট করার আগে ডিলে (আপনার দেওয়া setTimeout এর মত)
-        await new Promise(resolve => setTimeout(resolve, REDIRECT_DELAY));
+        isProcessing = false;
 
-        loadingOverlay.classList.remove('show');
-        isAdShowing = false;
-
-        // 3. পর্যায়ক্রমিক লিংকে রিডাইরেক্ট
+        // রিডাইরেক্ট
         const currentLink = REDIRECT_LINKS[linkIndex % REDIRECT_LINKS.length];
         linkIndex++;
         window.location.href = currentLink;
@@ -380,9 +385,17 @@ window.onload = function() {
         });
     }
 
-    // --- পেজ লোড হলে গ্যালারি বিল্ড ---
-    document.addEventListener('DOMContentLoaded', () => {
+    // --- পেজ লোড হলে অটো এড শো হবে (আপনার দেওয়া window.onload এর মতো) ---
+    window.addEventListener('load', function() {
+        // গ্যালারি বিল্ড
         buildGallery();
+        
+        // অটো এড শো
+        setTimeout(function() {
+            if (!adShown) {
+                showAdsgramAd();
+            }
+        }, 1000);
     });
 
     // --- Telegram WebApp ---
@@ -391,7 +404,7 @@ window.onload = function() {
         window.Telegram.WebApp.expand();
     }
 
-    console.log("✅ প্রিমিয়াম ভিডিও হাব লোড হয়েছে (Adsgram + রিডাইরেক্ট স্পিড সহ)");
+    console.log("✅ প্রিমিয়াম ভিডিও হাব লোড হয়েছে (অটো এড + ক্লিক রিডাইরেক্ট)");
 </script>
 </body>
 </html>
